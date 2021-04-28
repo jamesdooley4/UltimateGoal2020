@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
+import com.technototes.logger.Stated;
+
 import org.firstinspires.ftc.teamcode.commands.autonomous.AutoState;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -10,12 +11,11 @@ import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvPipeline;
-import org.openftc.easyopencv.OpenCvWebcam;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class VisionSubsystem extends OpenCvPipeline {
+public class VisionSubsystem extends OpenCvPipeline implements Stated<Integer> {
 
     //We declare the mats ontop so we can reuse them later to avoid memory leaks
     private Mat matYCrCb = new Mat();
@@ -57,6 +57,16 @@ public class VisionSubsystem extends OpenCvPipeline {
         webcam.openCameraDeviceAsync(() -> webcam.startStreaming(320,240, OpenCvCameraRotation.UPRIGHT));
     }
 
+    double avg;
+    Scalar mean1, mean2, mean3;
+    Mat m1 = new Mat(), m2 = new Mat(), m3 = new Mat();
+    Rect r;
+
+    Rect topRect, bottomRect;
+    Scalar topMean, bottomMean;
+
+    Scalar RED = new Scalar(255, 0, 0), GREEN = new Scalar(0, 255, 0);
+
     @Override
     public Mat processFrame(Mat input) {
         /**
@@ -68,18 +78,15 @@ public class VisionSubsystem extends OpenCvPipeline {
          */
         Imgproc.cvtColor(input, matYCrCb, Imgproc.COLOR_RGB2HSV);
 
-
-
-
         //The points needed for the rectangles are calculated here
-        Rect topRect = new Rect(
+        topRect = new Rect(
                 (int) (matYCrCb.width() * topRectWidthPercentage),
                 (int) (matYCrCb.height() * topRectHeightPercentage),
                 rectangleWidth,
                 rectangleHeight
         );
 
-        Rect bottomRect = new Rect(
+        bottomRect = new Rect(
                 (int) (matYCrCb.width() * bottomRectWidthPercentage),
                 (int) (matYCrCb.height() * bottomRectHeightPercentage),
                 rectangleWidth,
@@ -96,9 +103,9 @@ public class VisionSubsystem extends OpenCvPipeline {
         Core.extractChannel(bottomBlock, matCbBottom, 0);
         Core.extractChannel(topBlock, matCbTop, 0);
 
-        //We take the average
-        Scalar bottomMean = Core.mean(matCbBottom);
-        Scalar topMean = Core.mean(matCbTop);
+        //We take the averaoge
+        bottomMean = Core.mean(matCbBottom);
+        topMean = Core.mean(matCbTop);
 
         bottomAverage = bottomMean.val[0];
         topAverage = topMean.val[0];
@@ -110,41 +117,46 @@ public class VisionSubsystem extends OpenCvPipeline {
 //        telemetry.update();
         //return the mat to be shown onto the screen
 
-        Imgproc.cvtColor(input, matYCrCb, Imgproc.COLOR_RGB2RGBA);
-
-        goal = new ArrayList<>();
-        for(double d = 0; d<1; d+=upRectWidth){
-            Rect r = new Rect((int) (matYCrCb.width() * d), 0, (int) (matYCrCb.width()*upRectWidth), (int) (matYCrCb.height()*upRectHeight));
-            drawRectOnToMat(input, r, new Scalar(255, 0, 0));
-            Mat m1 = new Mat();
-            Mat m2 = new Mat();
-            Mat m3 = new Mat();
-
-            Core.extractChannel(matYCrCb.submat(r), m1, 0);
-            Core.extractChannel(matYCrCb.submat(r), m2, 1);
-            Core.extractChannel(matYCrCb.submat(r), m3, 2);
-
-            Scalar mean1 = Core.mean(m1);
-            Scalar mean2 = Core.mean(m2);
-            Scalar mean3 = Core.mean(m3);
-
-            double avg = mean1.val[0]-mean2.val[0]-mean3.val[0]+100;
-            //mats.add(m);
-
-            if(avg>0) goal.add((int) Math.round(d/upRectWidth));
-
-
-            //telemetry.addLine(Math.round(d/upRectWidth)+": "+avg+" ");
-
-        }
-//        telemetry.update();
-        mean = 0;
-        for(int i : goal){
-            mean+=i;
-        }
-        if(goal.size()!=0) mean/=goal.size();
-//        telemetry.addLine(""+mean);
-
+//        Imgproc.cvtColor(input, matYCrCb, Imgproc.COLOR_RGB2RGBA);
+//
+//        goal = new ArrayList<>();
+//        for(double d = 0; d<1; d+=upRectWidth){
+//            r = new Rect((int) (matYCrCb.width() * d), 0, (int) (matYCrCb.width()*upRectWidth), (int) (matYCrCb.height()*upRectHeight));
+//            drawRectOnToMat(input, r, new Scalar(255, 0, 0));
+//
+//            Core.extractChannel(matYCrCb.submat(r), m1, 0);
+//            Core.extractChannel(matYCrCb.submat(r), m2, 1);
+//            Core.extractChannel(matYCrCb.submat(r), m3, 2);
+//
+//            mean1 = Core.mean(m1);
+//            mean2 = Core.mean(m2);
+//            mean3 = Core.mean(m3);
+//
+//            avg = mean1.val[0]-mean2.val[0]-mean3.val[0]+100;
+//            //mats.add(m);
+//
+//            if(avg>0) goal.add((int) Math.round(d/upRectWidth));
+//
+//
+//            //telemetry.addLine(Math.round(d/upRectWidth)+": "+avg+" ");
+//
+//        }
+//        m1.release();
+//        m2.release();
+//        m3.release();
+//
+////        telemetry.update();
+//        mean = 0;
+//        for(int i : goal){
+//            mean+=i;
+//        }
+//        if(goal.size()!=0) mean/=goal.size();
+////        telemetry.addLine(""+mean);
+//        try {
+//            Thread.sleep(50);
+//        } catch (InterruptedException e) {
+//            System.out.println("vision thread interrupted");
+//        }
         return input;
     }
 
@@ -176,42 +188,8 @@ public class VisionSubsystem extends OpenCvPipeline {
         return bottomAverage;
     }
 
-    public void setMaxThreshold(int maxThreshold) {
-        this.maxThreshold = maxThreshold;
-    }
-
-    public int getMaxThreshold() {
-        return maxThreshold;
-    }
-    public void setMinThreshold(int minThreshold) {
-        this.minThreshold = minThreshold;
-    }
-
-    public int getMinThreshold() {
-        return minThreshold;
-    }
-
-    public void setTopRectWidthPercentage(double topRectWidthPercentage) {
-        this.topRectWidthPercentage = topRectWidthPercentage;
-    }
-
-    public void setTopRectHeightPercentage(double topRectHeightPercentage) {
-        this.topRectHeightPercentage = topRectHeightPercentage;
-    }
-
-    public void setBottomRectWidthPercentage(double bottomRectWidthPercentage) {
-        this.bottomRectWidthPercentage = bottomRectWidthPercentage;
-    }
-
-    public void setBottomRectHeightPercentage(double bottomRectHeightPercentage) {
-        this.bottomRectHeightPercentage = bottomRectHeightPercentage;
-    }
-
-    public void setRectangleWidth(int rectangleWidth) {
-        this.rectangleWidth = rectangleWidth;
-    }
-
-    public void setRectangleHeight(int rectangleHeight) {
-        this.rectangleHeight = rectangleHeight;
+    @Override
+    public Integer getState() {
+        return getStackSize();
     }
 }
