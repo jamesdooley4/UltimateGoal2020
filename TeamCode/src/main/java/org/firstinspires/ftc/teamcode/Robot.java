@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.subsystems.OdometrySubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IndexSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.TurretSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.VisionSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.WobbleSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.DrivebaseSubsystem;
@@ -44,6 +45,8 @@ public class Robot implements Loggable {
     public WobbleSubsystem wobbleSubsystem;
 
     public VisionSubsystem visionSubsystem;
+    
+    public TurretSubsystem turretSubsystem;
 
     public Robot(){
         hardware = new Hardware();
@@ -61,6 +64,8 @@ public class Robot implements Loggable {
         wobbleSubsystem =  new WobbleSubsystem(hardware.wobbleArmServo, hardware.wobbleClawServo);
 
         visionSubsystem = new VisionSubsystem(hardware.webcam);
+        
+        turretSubsystem = new TurretSubsystem(hardware.turretServo);
     }
 
 }
