@@ -1,36 +1,35 @@
 package org.firstinspires.ftc.teamcode.commands.turret;
 
-
 import com.technototes.library.command.Command;
-import com.technototes.library.hardware.servo.Servo;
-import com.technototes.library.subsystem.Subsystem;
+import com.technototes.library.control.gamepad.CommandButton;
 
 import org.firstinspires.ftc.teamcode.subsystems.TurretSubsystem;
 
+import java.util.function.BooleanSupplier;
+
 public class TurretRotateRightCommand extends Command {
-    public double start;
+
     public TurretSubsystem subsystem;
+    public double startingPos;
+    public CommandButton runCondition;
 
-    public TurretRotateRightCommand(TurretSubsystem sub){
-        addRequirements(sub);
+    public TurretRotateRightCommand(TurretSubsystem sub, CommandButton b){
         subsystem = sub;
-
-
+        runCondition = b;
     }
 
     @Override
     public void init() {
-        start = subsystem.getTurretPosition();
+        startingPos = subsystem.getTurretPosition();
     }
 
-    public void execute(){
-
-
-        subsystem.setServo1(start+ Math.pow(commandRuntime.seconds(), 3));
-
-
-
-
+    @Override
+    public void execute() {
+        subsystem.setTurretPosition(startingPos+Math.pow(commandRuntime.seconds()/5,3));
     }
 
+    @Override
+    public boolean isFinished() {
+        return runCondition.isReleased();
+    }
 }

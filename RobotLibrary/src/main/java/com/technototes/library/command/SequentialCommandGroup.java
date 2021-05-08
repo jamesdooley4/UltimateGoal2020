@@ -23,9 +23,9 @@ public class SequentialCommandGroup extends CommandGroup {
     @Override
     public void schedule(Command c) {
         if(lastCommand == null){
-            this.with(c);
-        } else{
-            lastCommand.then(c);
+            CommandScheduler.getInstance().scheduleWithOther(this, c);
+        }else {
+            CommandScheduler.getInstance().scheduleAfterOther(lastCommand, c);
         }
         lastCommand = c;
     }
@@ -39,21 +39,5 @@ public class SequentialCommandGroup extends CommandGroup {
         return !commandMap.containsValue(false);
     }
 
-    /*
-    g
-    ga
-    ga
-    ga
-    ga
-    gab
-    g b
-    g b
-    g bc
-    g  c
-    g  c
-    g  c
-    g
-
-     */
 
 }

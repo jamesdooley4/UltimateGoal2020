@@ -5,41 +5,33 @@ import com.technototes.library.subsystem.servo.ServoSubsystem;
 import com.technototes.logger.Stated;
 
 public class TurretSubsystem extends ServoSubsystem implements Stated<String> {
-
-    public Servo TurretServo;
-
-
-    public TurretSubsystem( Servo s){
-
-        TurretServo = s;
+    public Servo turretServo, raiseServo;
 
 
-
-
+    public TurretSubsystem(Servo turret, Servo raise){
+        super(turret, raise);
+        turretServo = turret;
+        raiseServo = raise;
     }
 
-    public void setServo1(double val){
-        TurretServo.setPosition(val);
-
-
-    }
-    public void changeBy(double change){
-
-        TurretServo.setPosition(TurretServo.getPosition()+change);
-
-
-    }
-
-
-    public String getState() {
-        return "TURRET: "+TurretServo.getPosition();
+    public void setTurretPosition(double val){
+        turretServo.setPosition(val);
     }
 
     public double getTurretPosition(){
-
-        return TurretServo.getPosition();
-
+        return turretServo.getPosition();
     }
 
+    public void changeBy(double v){
+        setTurretPosition(getTurretPosition()+v);
+    }
 
+    public void raise(){
+        raiseServo.setPosition(0.9);
+    }
+    @Override
+    public String getState() {
+        System.out.println(turretServo.getPosition());
+        return "TURRET: " + turretServo.getPosition();
+    }
 }
