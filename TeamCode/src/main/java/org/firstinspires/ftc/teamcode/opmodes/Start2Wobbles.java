@@ -21,7 +21,6 @@ import org.firstinspires.ftc.teamcode.commands.autonomous.ObtainSecondWobbleComm
 import org.firstinspires.ftc.teamcode.commands.autonomous.ParkCommand;
 import org.firstinspires.ftc.teamcode.commands.autonomous.PrepToShootCommand;
 import org.firstinspires.ftc.teamcode.commands.autonomous.SendOneRingToShooterCommand;
-import org.firstinspires.ftc.teamcode.commands.index.IndexPivotDownCommand;
 import org.firstinspires.ftc.teamcode.commands.shooter.ShooterStopCommand;
 import org.firstinspires.ftc.teamcode.subsystems.WobbleSubsystem;
 @Disabled
@@ -57,7 +56,6 @@ public class Start2Wobbles extends CommandOpMode implements Loggable {
                         new SendOneRingToShooterCommand(robot.indexSubsystem),
                         new SendOneRingToShooterCommand(robot.indexSubsystem),
                         new SendOneRingToShooterCommand(robot.indexSubsystem),
-                        new IndexPivotDownCommand(robot.indexSubsystem),
                         new ShooterStopCommand(robot.shooterSubsystem),
                         new DeliverFirstWobbleCommand(robot.drivebaseSubsystem, robot.wobbleSubsystem, state),
                         new ObtainSecondWobbleCommand(robot.drivebaseSubsystem, robot.wobbleSubsystem, state),
