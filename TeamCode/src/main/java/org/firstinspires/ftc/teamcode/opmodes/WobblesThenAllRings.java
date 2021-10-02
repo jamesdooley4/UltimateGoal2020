@@ -43,6 +43,7 @@ import org.firstinspires.ftc.teamcode.commands.shooter.ShooterSetSpeedCommand;
 import org.firstinspires.ftc.teamcode.commands.shooter.ShooterStopCommand;
 import org.firstinspires.ftc.teamcode.commands.wobble.WobbleRaiseCommand;
 import org.firstinspires.ftc.teamcode.subsystems.WobbleSubsystem;
+
 @Autonomous(name = "WobblesThenAllRings")
 public class WobblesThenAllRings extends CommandOpMode implements Loggable {
     /**
@@ -60,8 +61,8 @@ public class WobblesThenAllRings extends CommandOpMode implements Loggable {
         robot.wobbleSubsystem.setArmPosition(WobbleSubsystem.ArmPosition.RAISED);
         state = new AutoState(AutoState.Team.RED);
         state.setStackSize(AutoState.StackSize.FOUR);
-                    CommandScheduler.getInstance().scheduleForState(new GetStackSizeCommand(robot.visionStackSubsystem, state),
-                    () -> true, OpModeState.INIT);
+        CommandScheduler.getInstance().scheduleForState(new GetStackSizeCommand(robot.visionStackSubsystem, state),
+                () -> true, OpModeState.INIT);
     }
 
     @Override
@@ -69,20 +70,45 @@ public class WobblesThenAllRings extends CommandOpMode implements Loggable {
         robot.turretSubsystem.raise();
         robot.turretSubsystem.setTurretPosition(1);
 
+        //eyo pay attention ya goofs
+        boolean testingPowerShots = false;
+        //were you paying attention?
+
+        if (testingPowerShots) {
             CommandScheduler.getInstance().schedule(
                     new SequentialCommandGroup(
-                            new DeliverFirstWobble3Command(robot.drivebaseSubsystem, robot.wobbleSubsystem, state),
                             new ShooterSetSpeedCommand(robot.shooterSubsystem, () -> 800),
-                            //new PowershotCommand(robot.drivebaseSubsystem, robot.shooterSubsystem, robot.intakeSubsystem, robot.indexSubsystem, robot.turretSubsystem, state),
-                            //new ShooterSetSpeedCommand(robot.shooterSubsystem, () -> 1),
+                            new PowershotCommand(robot.drivebaseSubsystem, robot.shooterSubsystem, robot.intakeSubsystem, robot.indexSubsystem, robot.turretSubsystem, state),
+                            new InstantCommand(this::terminate)
+                    )
+            );
+        } else {
+            CommandScheduler.getInstance().schedule(
+                    new SequentialCommandGroup(
+                            //Powershots and bounceback(3->3 rings in bot)
+//                            new ShooterSetSpeedCommand(robot.shooterSubsystem, () -> 800),
+//                            new PowershotCommand(robot.drivebaseSubsystem, robot.shooterSubsystem, robot.intakeSubsystem, robot.indexSubsystem, robot.turretSubsystem, state),
+//                            new ShooterSetSpeedCommand(robot.shooterSubsystem, () -> 1),
+//                            new BouncebackCommand(robot.drivebaseSubsystem, robot.shooterSubsystem, robot.intakeSubsystem, robot.indexSubsystem, robot.turretSubsystem, state),
+
+                            //First wobble(3->3 rings in bot)
+                            new DeliverFirstWobble3Command(robot.drivebaseSubsystem, robot.wobbleSubsystem, state),
+
+                            //go shoot bouncebacks(3->0 rings in bot)
+//                            new PathToShootCommand(robot.drivebaseSubsystem, robot.shooterSubsystem, robot.intakeSubsystem, robot.turretSubsystem, state),
+//                            new AimAndShootCommand(robot.intakeSubsystem, robot.indexSubsystem, robot.turretSubsystem, robot.visionAimSubsystem, robot.shooterSubsystem),
+//                            new ShooterSetSpeedCommand(robot.shooterSubsystem, () -> 1),
+
                             new PathToShootCommand(robot.drivebaseSubsystem, robot.shooterSubsystem, robot.intakeSubsystem, robot.turretSubsystem, state),
                             new AimAndShootCommand(robot.intakeSubsystem, robot.indexSubsystem, robot.turretSubsystem, robot.visionAimSubsystem, robot.shooterSubsystem),
-                            new ShooterSetSpeedCommand(robot.shooterSubsystem, () -> 800)
-                                .with(new StrafeCommand(robot.drivebaseSubsystem, new Pose2d(50, 30, 0))),
-                                //.with(new IntakeStackCommand(robot.drivebaseSubsystem, robot.intakeSubsystem, state)),
+
+//                                    .with(new StrafeCommand(robot.drivebaseSubsystem, new Pose2d(50, 30, 0))),
+                            //Intake the stack(0->0 rings in bot, 0 on the field)
+                            new IntakeStackCommand(robot.drivebaseSubsystem, robot.intakeSubsystem, state),
+                            //Get the second wobble
                             new ObtainSecondWobble3Command(robot.drivebaseSubsystem, robot.wobbleSubsystem, state),
                             //new IntakeInCommand(robot.intakeSubsystem),
-                            //new ShooterSetSpeedCommand(robot.shooterSubsystem, () -> 800),
+                            new ShooterSetSpeedCommand(robot.shooterSubsystem, () -> 800),
                             new PathToShootCommand(robot.drivebaseSubsystem, robot.shooterSubsystem, robot.intakeSubsystem, robot.turretSubsystem, state)
                                     .with(new WobbleRaiseCommand(robot.wobbleSubsystem)),
 
@@ -93,6 +119,8 @@ public class WobblesThenAllRings extends CommandOpMode implements Loggable {
                                             .with(new InstantCommand(() -> robot.turretSubsystem.setTurretPosition(1)))),
                             new ParkCommand(robot.drivebaseSubsystem, robot.wobbleSubsystem, state),
                             new InstantCommand(this::terminate)
-                    ));
+                    )
+            );
+        }
     }
 }

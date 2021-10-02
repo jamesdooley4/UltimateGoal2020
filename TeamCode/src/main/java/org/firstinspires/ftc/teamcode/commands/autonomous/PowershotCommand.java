@@ -31,16 +31,19 @@ public class PowershotCommand extends SequentialCommandGroup {
                 new ShooterSetSpeed2Command(s, () -> 1000),
                 new SendOneRingToShooterCommand(ix),
                 //it shoots this one
-                new InstantCommand(() -> t.setTurretPosition(0.13)),
-                new ShooterSetSpeed2Command(s, () -> 1160),
+                new InstantCommand(() -> t.setTurretPosition(0.12)),
+                new ShooterSetSpeed2Command(s, () -> 1180),
+                new ShooterSetFlapCommand(s, () -> 0.8),
                 new SendOneRingToShooterCommand(ix),
                 //it shoots this one
-                new InstantCommand(() -> t.setTurretPosition(0.295)),
-                new ShooterSetSpeed2Command(s, () -> 1150),
+                new InstantCommand(() -> t.setTurretPosition(0.28)),
+                new ShooterSetSpeed2Command(s, () -> 1170),
+                new ShooterSetFlapCommand(s, () -> 0.8),
                 new SendOneRingToShooterCommand(ix),
                 //it shoots this one
-                new InstantCommand(() -> t.setTurretPosition(0.43)),
-                new ShooterSetSpeed2Command(s, () -> 1150),
+                new InstantCommand(() -> t.setTurretPosition(0.39)),
+                new ShooterSetSpeed2Command(s, () -> 1170),
+                new ShooterSetFlapCommand(s, () -> 0.8),
                 new SendOneRingToShooterCommand(ix)
 
         );
