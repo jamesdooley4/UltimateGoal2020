@@ -24,16 +24,17 @@ public class AutoSquare extends CommandOpMode {
     public void uponStart() {
         CommandScheduler.getInstance().schedule(
                 new SequentialCommandGroup(
-                        new InstantCommand(() -> robot.drivebaseSubsystem.setWeightedDrivePower(new Pose2d(1, 0, 0))),
+                        new InstantCommand(() -> robot.drivebaseSubsystem.setWeightedDrivePower(new Pose2d(0.2, 0, 0))),
                         new WaitCommand(1),
-                        new InstantCommand(() -> robot.drivebaseSubsystem.setWeightedDrivePower(new Pose2d(0, 1, 90))),
+                        new InstantCommand(() -> robot.drivebaseSubsystem.setWeightedDrivePower(new Pose2d(0, 0.2, 0.0))),
                         new WaitCommand(1),
-                        new InstantCommand(() -> robot.drivebaseSubsystem.setWeightedDrivePower(new Pose2d(-1, 0, 180))),
+                        new InstantCommand(() -> robot.drivebaseSubsystem.setWeightedDrivePower(new Pose2d(-0.2, 0, 0.0))),
                         new WaitCommand(1),
-                        new InstantCommand(() -> robot.drivebaseSubsystem.setWeightedDrivePower(new Pose2d(0, -1, 270))),
+                        new InstantCommand(() -> robot.drivebaseSubsystem.setWeightedDrivePower(new Pose2d(0, -0.2, 0.0))),
                         new WaitCommand(1),
                         new InstantCommand(() -> robot.drivebaseSubsystem.setWeightedDrivePower(new Pose2d(0,0,0))),
-                        new WaitCommand(1)
+                        new WaitCommand(1),
+                        new InstantCommand(this::terminate)
                 )
         );
     }
