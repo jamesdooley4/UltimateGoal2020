@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.technototes.control.gamepad.GamepadStick;
 import com.technototes.library.command.Command;
 import com.technototes.library.command.ConditionalCommand;
@@ -33,6 +34,7 @@ import org.firstinspires.ftc.teamcode.commands.wobble.WobbleOpenCommand;
 import org.firstinspires.ftc.teamcode.commands.wobble.WobbleRaiseCommand;
 import org.firstinspires.ftc.teamcode.commands.wobble.WobbleRotateLeftCommand;
 import org.firstinspires.ftc.teamcode.commands.wobble.WobbleRotateRightCommand;
+import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
 
 /** Class for driver controls
  *
@@ -118,6 +120,8 @@ public class OperatorInterface {
 
         powerButton.whilePressed(new ShooterSetFlapCommand(robot.shooterSubsystem, ()->0));
 
+        //2600 max tps
+        //lower flap to aim it higher
         firePrepButton.whenPressed(new ShooterSetFlapCommand(robot.shooterSubsystem, ()->0.88))
                 .whilePressed(new ShooterSetSpeedCommand(robot.shooterSubsystem, ()->1350))
                 .whilePressed(new VisionAlignCommand(robot.turretSubsystem, robot.visionAimSubsystem).asConditional(()->!powerButton.getAsBoolean()));
