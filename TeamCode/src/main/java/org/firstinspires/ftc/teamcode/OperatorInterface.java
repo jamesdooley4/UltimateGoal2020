@@ -29,7 +29,7 @@ public class OperatorInterface {
     /** Gamepads
      *
      */
-    public CommandGamepad driverGamepad, codriverGamepad;
+    public CommandGamepad driverGamepad;
 
     /** Buttons for intake
      * mainbutton toggles between intaking in and off, and spit just extakes
@@ -50,7 +50,6 @@ public class OperatorInterface {
 
         //instantiate objects
         driverGamepad = driver;
-        codriverGamepad = codriver;
         robot = r;
 
         //set buttons

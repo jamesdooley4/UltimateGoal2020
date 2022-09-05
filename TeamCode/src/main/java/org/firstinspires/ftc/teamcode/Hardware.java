@@ -58,7 +58,7 @@ public class Hardware implements Loggable {
         //TODO fix this warning
         intakeMotorGroup = new MotorGroup(intakeMotor1, intakeMotor2);
 
-        shooterMotor = new EncodedMotor<DcMotorEx>("shooter1").invert();
+        shooterMotor = new EncodedMotor<DcMotorEx>("shooter1");
 
         shooterFlapServo = new Servo("flapservo");
     }
