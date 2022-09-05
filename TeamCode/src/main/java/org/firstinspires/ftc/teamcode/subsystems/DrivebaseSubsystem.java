@@ -11,7 +11,6 @@ import com.acmerobotics.roadrunner.drive.MecanumDrive;
 import com.acmerobotics.roadrunner.followers.HolonomicPIDVAFollower;
 import com.acmerobotics.roadrunner.followers.TrajectoryFollower;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.localization.Localizer;
 import com.acmerobotics.roadrunner.profile.MotionProfile;
 import com.acmerobotics.roadrunner.profile.MotionProfileGenerator;
 import com.acmerobotics.roadrunner.profile.MotionState;
@@ -34,8 +33,6 @@ import com.technototes.library.hardware.HardwareDevice;
 import com.technototes.library.hardware.motor.EncodedMotor;
 import com.technototes.library.hardware.sensor.IMU;
 import com.technototes.library.subsystem.Subsystem;
-
-import org.firstinspires.ftc.teamcode.roadrunnercode.util.LynxModuleUtil;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -104,7 +101,7 @@ public class DrivebaseSubsystem extends MecanumDrive {
 
     public DrivebaseSubsystem(EncodedMotor<DcMotorEx> fl, EncodedMotor<DcMotorEx> fr,
                               EncodedMotor<DcMotorEx> rl, EncodedMotor<DcMotorEx> rr,
-                              IMU i, Localizer local) {
+                              IMU i) {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
 
         dashboard = FtcDashboard.getInstance();
@@ -126,8 +123,6 @@ public class DrivebaseSubsystem extends MecanumDrive {
                 new Pose2d(0.5, 0.5, Math.toRadians(5.0)), 0.5);
 
         poseHistory = new LinkedList<>();
-
-        LynxModuleUtil.ensureMinimumFirmwareVersion(HardwareDevice.hardwareMap);
 
         batteryVoltageSensor = HardwareDevice.hardwareMap.voltageSensor.iterator().next();
 
@@ -168,8 +163,6 @@ public class DrivebaseSubsystem extends MecanumDrive {
         leftFront.invert();
         leftRear.invert();
 
-        // TODO: if desired, use setLocalizer() to change the localization method
-        /* for instance,*/ setLocalizer(local);
         setPoseEstimate(new Pose2d());
     }
 
