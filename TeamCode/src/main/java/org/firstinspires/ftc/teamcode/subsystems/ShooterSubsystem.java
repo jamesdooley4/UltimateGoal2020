@@ -17,7 +17,7 @@ public class ShooterSubsystem extends EncodedMotorSubsystem implements Stated<Do
     public EncodedMotor<DcMotorEx> motor1;
     public Servo flap;
 
-    public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(1000, 0, 0, 0);
+    public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(10, 0, 0, 10);
 
     public ShooterSubsystem(EncodedMotor<DcMotorEx> m, Servo f){
         super(new EncodedMotorGroup(m));
@@ -28,11 +28,11 @@ public class ShooterSubsystem extends EncodedMotorSubsystem implements Stated<Do
 
     }
     public void setVelocity(double p){
+        System.out.println("Shooter set velocity: " + p);
         motor1.getDevice().setVelocity(p);
     }
 
     public double getVelocity(){
-        System.out.println(motor1.getDevice().getVelocity());
         return motor1.getDevice().getVelocity();
     }
     public double getIdleVelocity(){
