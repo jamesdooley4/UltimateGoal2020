@@ -17,7 +17,7 @@ import java.util.List;
 
 public class VisionAimSubsystem extends OpenCvPipeline implements Stated<Integer> {
 
-    private double upRectHeight = 0.5;
+    private double upRectHeight = 0.4;
     private double upRectWidth = 0.02;
     private Mat matYCrCb = new Mat();
 
@@ -29,8 +29,19 @@ public class VisionAimSubsystem extends OpenCvPipeline implements Stated<Integer
     public VisionAimSubsystem(OpenCvCamera w) {
         webcam = w;
         webcam.setPipeline(this);
-        webcam.openCameraDeviceAsync(() -> webcam.startStreaming(320,240, OpenCvCameraRotation.UPRIGHT));
-    }
+        final boolean useWebcamWorkaround = true;
+        if (useWebcamWorkaround) {
+            new Thread(() -> {
+                try {
+                    webcam.openCameraDevice();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                webcam.openCameraDeviceAsync(() -> webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT));
+            }).start();
+        } else {
+            webcam.openCameraDeviceAsync(() -> webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT));
+        }    }
 
     private Mat m1, m2, m3;
     private Rect r;

@@ -16,6 +16,8 @@ public class GetStackSizeCommand extends WaitCommand {
 
     @Override
     public void init() {
+
         autoState.setStackSize(subsystem.getStackSizeEnum());
+        System.out.println("Stack size: " + subsystem.getStackSize());
     }
 }

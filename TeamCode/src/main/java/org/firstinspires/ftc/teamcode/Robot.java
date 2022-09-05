@@ -17,6 +17,7 @@ import org.firstinspires.ftc.teamcode.subsystems.VisionAimSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.VisionStackSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.WobbleSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.DrivebaseSubsystem;
+import org.openftc.easyopencv.OpenCvCameraRotation;
 
 /** Class for the subsystems on the robot
  *
@@ -51,8 +52,8 @@ public class Robot implements Loggable {
     public WobbleSubsystem wobbleSubsystem;
 
     //numrings is only shown during the init period of the match
-//    @LogConfig.Run(duringInit = true, duringRun = false)
-//    @Log.Number(name = "numrings", index = 0, color = Color.YELLOW, numberColor = Color.YELLOW)
+    @LogConfig.Run(duringInit = true, duringRun = false)
+    @Log.Number(name = "numrings", index = 0, color = Color.YELLOW, numberColor = Color.YELLOW)
     public VisionStackSubsystem visionStackSubsystem;
 
     public VisionAimSubsystem visionAimSubsystem;
@@ -64,10 +65,12 @@ public class Robot implements Loggable {
     //voltage displayed in yellow to catch driver's eye
     @Log.Number(name="VOLTAGE", index = 0, color = Color.YELLOW, numberColor = Color.LIGHT_GRAY)
     public double getVoltage(){
-        return HardwareDevice.hardwareMap.voltageSensor.iterator().next().getVoltage();
+        double d = HardwareDevice.hardwareMap.voltageSensor.iterator().next().getVoltage();
+        System.out.println(d);
+        return d;
     }
 
-    public Robot(){
+    public Robot(boolean stack){
         hardware = new Hardware();
 
         odometrySubsystem = new OdometrySubsystem(hardware.leftOdometryEncoder, hardware.rightOdometryEncoder, hardware.frontOdometryEncoder);
@@ -82,13 +85,20 @@ public class Robot implements Loggable {
 
         wobbleSubsystem =  new WobbleSubsystem(hardware.wobbleArmServos, hardware.wobbleClawServo, hardware.wobbleTurretServo);
 
-        //visionStackSubsystem = new VisionStackSubsystem(hardware.webcam);
+        if(stack) {
+            visionStackSubsystem = new VisionStackSubsystem(hardware.webcam);
+        }else {
+            visionAimSubsystem = new VisionAimSubsystem(hardware.webcam);
+        }
 
-        visionAimSubsystem = new VisionAimSubsystem(hardware.webcam);
+
+
 
         turretSubsystem = new TurretSubsystem(hardware.turretServo, hardware.raiseServo);
 
         stickSubsystem = new StickSubsystem(hardware.sticks);
     }
-
+    public Robot(){
+        this(false);
+    }
 }

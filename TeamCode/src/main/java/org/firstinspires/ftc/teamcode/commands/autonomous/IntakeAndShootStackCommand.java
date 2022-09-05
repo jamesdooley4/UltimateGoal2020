@@ -16,22 +16,24 @@ import org.firstinspires.ftc.teamcode.commands.intake.IntakeInCommand;
 import org.firstinspires.ftc.teamcode.commands.intake.IntakeOutCommand;
 import org.firstinspires.ftc.teamcode.commands.intake.IntakeStopCommand;
 import org.firstinspires.ftc.teamcode.subsystems.DrivebaseSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.IndexSubsystem;
 import org.firstinspires.ftc.teamcode.subsystems.IntakeSubsystem;
+import org.firstinspires.ftc.teamcode.subsystems.ShooterSubsystem;
 
-public class IntakeStackCommand extends SequentialCommandGroup {
-    public IntakeStackCommand(DrivebaseSubsystem d, IntakeSubsystem i, AutoState s) {
+public class IntakeAndShootStackCommand extends SequentialCommandGroup {
+    public IntakeAndShootStackCommand(DrivebaseSubsystem d, IntakeSubsystem i, ShooterSubsystem s, IndexSubsystem ix, AutoState st) {
         super(
                 //new InstantCommand(()->d.setWeightedDrivePower(new Pose2d(-0.3, 0, 0))),
                 new IntakeInCommand(i),
-                new StrafeCommand(d, s.correctedPos(51, 13, 0)),
+                new StrafeCommand(d, st.correctedPos(51, 13, 0)),
                 new WaitCommand(0.3),
                 //new IntakeInCommand(i),
-                new StrafeCommand(d, s.correctedPos(47, 12, 0)),
+                new StrafeCommand(d, st.correctedPos(47, 12, 0)),
                 new WaitCommand(0.3),
-                new StrafeCommand(d, s.correctedPos(44, 11, 0)),
+                new StrafeCommand(d, st.correctedPos(44, 11, 0)),
                 new WaitCommand(0.3),
 //                new StrafeCommand(d, s.correctedPos(41, 11, 0))
-                new StrafeCommand(d, s.correctedPos(44, 25, 0)),
+                new StrafeCommand(d, st.correctedPos(44, 25, 0)),
 //                new WaitCommand(2)
 //                new IntakeStopCommand(i)
 //                new IntakeInCommand(i),
