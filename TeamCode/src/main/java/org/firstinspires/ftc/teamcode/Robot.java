@@ -29,13 +29,13 @@ public class Robot implements Loggable {
 
     //shooter logged with number/progress bar
     //@Log.NumberBar(name = "Shooter", index =  2, completeBarColor = Color.GREEN, min = 0, max=2000)
+    @Log(name = "shooter, index = 2")
     public ShooterSubsystem shooterSubsystem;
 
     //voltage displayed in yellow to catch driver's eye
     @Log.Number(name="VOLTAGE", index = 0, color = Color.YELLOW, numberColor = Color.LIGHT_GRAY)
     public double getVoltage(){
         double d = HardwareDevice.hardwareMap.voltageSensor.iterator().next().getVoltage();
-        System.out.println(d);
         return d;
     }
 

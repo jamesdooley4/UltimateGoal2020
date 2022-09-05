@@ -29,20 +29,11 @@ public class TeleOpV1 extends CommandOpMode implements Loggable {
     public void uponInit() {
         CommandScheduler.resetScheduler();
         robot = new Robot();
-        operatorInterface = new OperatorInterface(driverGamepad, codriverGamepad, robot);
+        operatorInterface = new OperatorInterface(driverGamepad, robot);
     }
-
-
 
     @Override
     public boolean additionalInitConditions() {
         return getRuntime()>5;
-    }
-
-    @Override
-    public void runLoop() {
-        System.out.print(robot.shooterSubsystem.motor1.getDevice().getVelocity());
-        System.out.print("               ");
-        System.out.println(robot.shooterSubsystem.motor1.getDevice().getPower());
     }
 }

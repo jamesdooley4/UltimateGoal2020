@@ -20,16 +20,10 @@ public class ShooterSetSpeedCommand extends WaitCommand {
     @Override
     public void init() {
         curr = supplier.getAsDouble();
-
     }
 
     @Override
     public void execute() {
-        subsystem.setVelocity(curr*(1+(curr-subsystem.getVelocity())/500));
+        subsystem.setVelocity(curr);
     }
-
-//    @Override
-//    public boolean isFinished() {
-//        return Math.abs(subsystem.getVelocity()-curr) < 20;
-//    }
 }
