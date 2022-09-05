@@ -15,24 +15,20 @@ import com.technototes.logger.Stated;
  */
 public class ShooterSubsystem extends EncodedMotorSubsystem implements Stated<Double> {
     public EncodedMotor<DcMotorEx> motor1;
-    public Motor<DcMotorEx> motor2;
     public Servo flap;
 
     public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(1000, 0, 0, 0);
 
-    public ShooterSubsystem(EncodedMotor<DcMotorEx> m1, Motor<DcMotorEx> m2, Servo f){
-        super(new EncodedMotorGroup(m1, m2));
-        motor1 = m1;
-        motor2 = m2;
-        m1.setPIDFCoeffecients(MOTOR_VELO_PID);
+    public ShooterSubsystem(EncodedMotor<DcMotorEx> m, Servo f){
+        super(new EncodedMotorGroup(m));
+        motor1 = m;
+        motor1.setPIDFCoeffecients(MOTOR_VELO_PID);
         flap = f;
         flap.setRange(0.5, 1);
 
     }
     public void setVelocity(double p){
         motor1.getDevice().setVelocity(p);
-        motor2.getDevice().setPower(motor1.getDevice().getPower());
-
     }
 
     public double getVelocity(){

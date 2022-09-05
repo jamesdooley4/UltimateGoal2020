@@ -30,7 +30,6 @@ public class TeleOpV1 extends CommandOpMode implements Loggable {
         CommandScheduler.resetScheduler();
         robot = new Robot();
         operatorInterface = new OperatorInterface(driverGamepad, codriverGamepad, robot);
-        robot.turretSubsystem.raise();
     }
 
 
