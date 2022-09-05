@@ -28,20 +28,32 @@ public class ShooterConfigOpMode extends CommandOpMode implements Loggable {
     @LogConfig.Disabled
     public Robot robot;
 
+    // Shooter motor doesn't keep constant velocity, so store the last set shooter velocity value locally
+    private double lastSetShooterVelocity = 0;
+
+    private final double DEFAULT_INDEX_POSITION = 1.0;
+    private final double DEFAULT_FLAP_POSITION = 1.0;
+    private final double DEFAULT_SHOOTER_VELOCITY = 0.0;
+
     @Override
     public void uponInit() {
         robot = new Robot();
-        driverGamepad.dpadUp.whilePressed(new ShooterSetSpeedCommand(robot.shooterSubsystem, ()->robot.shooterSubsystem.getVelocity()+10));
-        driverGamepad.dpadDown.whilePressed(new ShooterSetSpeedCommand(robot.shooterSubsystem, ()->robot.shooterSubsystem.getVelocity()-10));
-        driverGamepad.a.whenPressed(new ShooterSetSpeedCommand(robot.shooterSubsystem, ()->0));
+
+        robot.shooterSubsystem.setVelocity(DEFAULT_SHOOTER_VELOCITY);
+        robot.shooterSubsystem.setFlapPosition(DEFAULT_FLAP_POSITION);
+        robot.indexSubsystem.setPosition(DEFAULT_INDEX_POSITION);
+
+        driverGamepad.dpadUp.whilePressed(new ShooterSetSpeedCommand(robot.shooterSubsystem, ()->lastSetShooterVelocity+=10));
+        driverGamepad.dpadDown.whilePressed(new ShooterSetSpeedCommand(robot.shooterSubsystem, ()->lastSetShooterVelocity-=10));
+        driverGamepad.a.whenPressed(new ShooterSetSpeedCommand(robot.shooterSubsystem, ()->lastSetShooterVelocity=DEFAULT_SHOOTER_VELOCITY));
 
         driverGamepad.dpadLeft.whilePressed(new ShooterSetFlapCommand(robot.shooterSubsystem, ()->robot.shooterSubsystem.getFlapPosition()+0.05));
         driverGamepad.dpadRight.whilePressed(new ShooterSetFlapCommand(robot.shooterSubsystem, ()->robot.shooterSubsystem.getFlapPosition()-0.05));
-        driverGamepad.b.whenPressed(new ShooterSetFlapCommand(robot.shooterSubsystem, ()->1));
+        driverGamepad.b.whenPressed(new ShooterSetFlapCommand(robot.shooterSubsystem, ()->DEFAULT_FLAP_POSITION));
 
         driverGamepad.leftBumper.whilePressed(new ArmSetPositionCommand(robot.indexSubsystem, ()->robot.indexSubsystem.getPosition()+0.05));
         driverGamepad.rightBumper.whilePressed(new ArmSetPositionCommand(robot.indexSubsystem, ()->robot.indexSubsystem.getPosition()-0.05));
-        driverGamepad.x.whenPressed(new ArmSetPositionCommand(robot.indexSubsystem, ()->1));
+        driverGamepad.x.whenPressed(new ArmSetPositionCommand(robot.indexSubsystem, ()->DEFAULT_INDEX_POSITION));
     }
 
     @Log.Number(name = "shooterSpeed", index = 0)
