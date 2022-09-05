@@ -19,10 +19,11 @@ import org.firstinspires.ftc.teamcode.OperatorInterface;
 import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.commands.TurnCommand;
 import org.firstinspires.ftc.teamcode.commands.drivebase.DriveCommand;
+import org.firstinspires.ftc.teamcode.commands.index.ArmSetPositionCommand;
 import org.firstinspires.ftc.teamcode.commands.shooter.ShooterSetFlapCommand;
 import org.firstinspires.ftc.teamcode.commands.shooter.ShooterSetSpeedCommand;
 //@Disabled
-@TeleOp(name = "shooterconfig")
+@TeleOp(name = "shooter config")
 public class ShooterConfigOpMode extends CommandOpMode implements Loggable {
     @LogConfig.Disabled
     public Robot robot;
@@ -32,45 +33,35 @@ public class ShooterConfigOpMode extends CommandOpMode implements Loggable {
         robot = new Robot();
         driverGamepad.dpadUp.whenPressed(new ShooterSetSpeedCommand(robot.shooterSubsystem, ()->robot.shooterSubsystem.getVelocity()+0.05));
         driverGamepad.dpadDown.whenPressed(new ShooterSetSpeedCommand(robot.shooterSubsystem, ()->robot.shooterSubsystem.getVelocity()-0.05));
+        driverGamepad.a.whenPressed(new ShooterSetSpeedCommand(robot.shooterSubsystem, ()->0));
+
         driverGamepad.dpadLeft.whenPressed(new ShooterSetFlapCommand(robot.shooterSubsystem, ()->robot.shooterSubsystem.getFlapPosition()+0.05));
         driverGamepad.dpadRight.whenPressed(new ShooterSetFlapCommand(robot.shooterSubsystem, ()->robot.shooterSubsystem.getFlapPosition()-0.05));
-        driverGamepad.a.whilePressed(new DriveCommand(robot.drivebaseSubsystem, driverGamepad.leftStick, driverGamepad.rightStick));
-        driverGamepad.leftBumper.whenPressed(new InstantCommand(()->robot.drivebaseSubsystem.turn(robot.drivebaseSubsystem.getExternalHeading()-0.1)));
-        driverGamepad.rightBumper.whenPressed(new InstantCommand(()->robot.drivebaseSubsystem.turn(robot.drivebaseSubsystem.getExternalHeading()+0.1)));
+        driverGamepad.b.whenPressed(new ShooterSetFlapCommand(robot.shooterSubsystem, ()->0));
 
+        driverGamepad.leftBumper.whenPressed(new ArmSetPositionCommand(robot.indexSubsystem, ()->robot.indexSubsystem.getPosition()+0.05));
+        driverGamepad.rightBumper.whenPressed(new ArmSetPositionCommand(robot.indexSubsystem, ()->robot.indexSubsystem.getPosition()-0.05));
+        driverGamepad.x.whenPressed(new ArmSetPositionCommand(robot.indexSubsystem, ()->0));
     }
 
-    @Log.Number(name = "x", index = 0)
-    public double x(){
-        System.out.print("  x "+ (int)robot.drivebaseSubsystem.getPoseEstimate().getX());
-        return robot.drivebaseSubsystem.getPoseEstimate().getX();
-    }
-    @Log.Number(name = "y", index = 1)
-    public double y(){
-        System.out.print("  y "+ (int)robot.drivebaseSubsystem.getPoseEstimate().getY());
-        return robot.drivebaseSubsystem.getPoseEstimate().getY();
-
-    }
-    @Log.Number(name = "rotation", index = 2)
-    public double rotation(){
-        System.out.print("  rot "+ (int)Math.toDegrees(robot.drivebaseSubsystem.getExternalHeading()));
-        return Math.toDegrees(robot.drivebaseSubsystem.getExternalHeading());
-
-    }
-    @Log.Number(name = "shooterspeed", index = 3)
+    @Log.Number(name = "shooterSpeed", index = 0)
     public double shooter(){
         System.out.print("  sp "+ robot.shooterSubsystem.motor1.getDevice().getVelocity());
 
         return robot.shooterSubsystem.getVelocity();
     }
-    @Log.Number(name = "flappos", index = 4)
+    @Log.Number(name = "shooterFlap", index = 1)
     public double flap(){
         System.out.print("  fl "+ robot.shooterSubsystem.getFlapPosition());
         return robot.shooterSubsystem.getFlapPosition();
     }
+    @Log.Number(name = "indexArm", index = 2)
+    public double arm(){
+        System.out.print("  fl "+ robot.indexSubsystem.getPosition());
+        return robot.indexSubsystem.getPosition();
+    }
 
     @Override
     public void universalLoop() {
-        System.out.println();
     }
 }
