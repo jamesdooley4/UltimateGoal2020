@@ -34,33 +34,3 @@ repositories {
     mavenCentral()
 }
 
-dependencies {
-    doc 'org.firstinspires.ftc:Hardware:9.0.1'
-    doc 'org.firstinspires.ftc:RobotCore:9.0.1'
-    doc 'org.firstinspires.ftc:FtcCommon:9.0.1'
-    doc 'org.firstinspires.ftc:OnBotJava:9.0.1'
-    doc 'org.firstinspires.ftc:Inspection:9.0.1'
-}
-
-task extractJavadoc {
-    doLast {
-        def componentIds = configurations.doc.incoming.resolutionResult.allDependencies.collect { it.selected.id }
-
-        def result = dependencies.createArtifactResolutionQuery()
-                .forComponents(componentIds)
-                .withArtifacts(JvmLibrary, SourcesArtifact, JavadocArtifact)
-                .execute()
-
-        for (component in result.resolvedComponents) {
-            component.getArtifacts(JavadocArtifact).each { artifact ->
-                def version = artifact.identifier.componentIdentifier.version
-                def libName = artifact.identifier.componentIdentifier.moduleIdentifier.name
-                copy {
-                    from zipTree(artifact.file)
-                    into "docs/$version/$libName/"
-                }
-            }
-        }
-    }
-}
-
