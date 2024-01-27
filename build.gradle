@@ -4,10 +4,6 @@
  * It is extraordinarily rare that you will ever need to edit this file.
  */
 
-configurations {
-    doc { transitive false }
-}
-
 buildscript {
     repositories {
         mavenCentral()
@@ -15,6 +11,7 @@ buildscript {
     }
 
     dependencies {
+        // Note for FTC Teams: Do not modify this yourself.
         classpath 'com.android.tools.build:gradle:7.2.0'
     }
 }
@@ -38,11 +35,11 @@ repositories {
 }
 
 dependencies {
-    doc 'org.firstinspires.ftc:Hardware:8.1.1'
-    doc 'org.firstinspires.ftc:RobotCore:8.1.1'
-    doc 'org.firstinspires.ftc:FtcCommon:8.1.1'
-    doc 'org.firstinspires.ftc:OnBotJava:8.1.1'
-    doc 'org.firstinspires.ftc:Inspection:8.1.1'
+    doc 'org.firstinspires.ftc:Hardware:9.0.1'
+    doc 'org.firstinspires.ftc:RobotCore:9.0.1'
+    doc 'org.firstinspires.ftc:FtcCommon:9.0.1'
+    doc 'org.firstinspires.ftc:OnBotJava:9.0.1'
+    doc 'org.firstinspires.ftc:Inspection:9.0.1'
 }
 
 task extractJavadoc {

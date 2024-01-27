@@ -89,6 +89,7 @@ import com.qualcomm.robotcore.hardware.configuration.LynxConstants;
 import com.qualcomm.robotcore.hardware.configuration.Utility;
 import com.qualcomm.robotcore.robot.Robot;
 import com.qualcomm.robotcore.robot.RobotState;
+import com.qualcomm.robotcore.util.ClockWarningSource;
 import com.qualcomm.robotcore.util.Device;
 import com.qualcomm.robotcore.util.Dimmer;
 import com.qualcomm.robotcore.util.ImmersiveMode;
@@ -99,8 +100,10 @@ import com.qualcomm.robotcore.wifi.NetworkConnectionFactory;
 import com.qualcomm.robotcore.wifi.NetworkType;
 
 import org.firstinspires.ftc.ftccommon.external.SoundPlayingRobotMonitor;
+import org.firstinspires.ftc.ftccommon.internal.AnnotatedHooksClassFilter;
 import org.firstinspires.ftc.ftccommon.internal.FtcRobotControllerWatchdogService;
 import org.firstinspires.ftc.ftccommon.internal.ProgramAndManageActivity;
+import org.firstinspires.ftc.onbotjava.ExternalLibraries;
 import org.firstinspires.ftc.onbotjava.OnBotJavaHelperImpl;
 import org.firstinspires.ftc.onbotjava.OnBotJavaProgrammingMode;
 import org.firstinspires.ftc.robotcore.external.navigation.MotionDetection;
@@ -123,6 +126,7 @@ import org.firstinspires.ftc.robotcore.internal.ui.UILocation;
 import org.firstinspires.ftc.robotcore.internal.webserver.RobotControllerWebInfo;
 import org.firstinspires.ftc.robotserver.internal.programmingmode.ProgrammingModeManager;
 import org.firstinspires.inspection.RcInspectionActivity;
+import org.threeten.bp.YearMonth;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.FileNotFoundException;
@@ -141,6 +145,8 @@ public class FtcRobotControllerActivity extends Activity
 
   protected WifiManager.WifiLock wifiLock;
   protected RobotConfigFileManager cfgFileMgr;
+
+  private OnBotJavaHelper onBotJavaHelper;
 
   protected ProgrammingModeManager programmingModeManager;
 
@@ -301,6 +307,18 @@ public class FtcRobotControllerActivity extends Activity
     preferencesHelper.writeBooleanPrefIfDifferent(context.getString(R.string.pref_rc_connected), true);
     preferencesHelper.getSharedPreferences().registerOnSharedPreferenceChangeListener(sharedPreferencesListener);
 
+    // Check if this RC app is from a later FTC season than what was installed previously
+    int ftcSeasonYearOfPreviouslyInstalledRc = preferencesHelper.readInt(getString(R.string.pref_ftc_season_year_of_current_rc), 0);
+    int ftcSeasonYearOfCurrentlyInstalledRc = AppUtil.getInstance().getFtcSeasonYear(AppUtil.getInstance().getLocalSdkBuildMonth()).getValue();
+    if (ftcSeasonYearOfCurrentlyInstalledRc > ftcSeasonYearOfPreviouslyInstalledRc) {
+      preferencesHelper.writeIntPrefIfDifferent(getString(R.string.pref_ftc_season_year_of_current_rc), ftcSeasonYearOfCurrentlyInstalledRc);
+      // Since it's a new FTC season, we should reset certain settings back to their default values.
+      preferencesHelper.writeBooleanPrefIfDifferent(getString(R.string.pref_warn_about_2_4_ghz_band), true);
+      preferencesHelper.writeBooleanPrefIfDifferent(getString(R.string.pref_warn_about_obsolete_software), true);
+      preferencesHelper.writeBooleanPrefIfDifferent(getString(R.string.pref_warn_about_mismatched_app_versions), true);
+      preferencesHelper.writeBooleanPrefIfDifferent(getString(R.string.pref_warn_about_incorrect_clocks), true);
+    }
+
     entireScreenLayout = (LinearLayout) findViewById(R.id.entire_screen);
     buttonMenu = (ImageButton) findViewById(R.id.menu_buttons);
     buttonMenu.setOnClickListener(new View.OnClickListener() {
@@ -314,7 +332,8 @@ public class FtcRobotControllerActivity extends Activity
           }
         });
         popupMenu.inflate(R.menu.ftc_robot_controller);
-        FtcDashboard.populateMenu(context, popupMenu.getMenu());
+        AnnotatedHooksClassFilter.getInstance().callOnCreateMenuMethods(
+            FtcRobotControllerActivity.this, popupMenu.getMenu());
         popupMenu.show();
       }
     });
@@ -323,6 +342,9 @@ public class FtcRobotControllerActivity extends Activity
 
     BlocksOpMode.setActivityAndWebView(this, (WebView) findViewById(R.id.webViewBlocksRuntime));
 
+    ExternalLibraries.getInstance().onCreate();
+    onBotJavaHelper = new OnBotJavaHelperImpl();
+
     /*
      * Paranoia as the ClassManagerFactory requires EXTERNAL_STORAGE permissions
      * and we've seen on the DS where the finish() call above does not short-circuit
@@ -330,7 +352,7 @@ public class FtcRobotControllerActivity extends Activity
      * have permissions. So...
      */
     if (permissionsValidated) {
-      ClassManager.getInstance().setOnBotJavaClassHelper(new OnBotJavaHelperImpl());
+      ClassManager.getInstance().setOnBotJavaClassHelper(onBotJavaHelper);
       ClassManagerFactory.registerFilters();
       ClassManagerFactory.processAllClasses();
     }
@@ -374,21 +396,20 @@ public class FtcRobotControllerActivity extends Activity
     readNetworkType();
     ServiceController.startService(FtcRobotControllerWatchdogService.class);
     bindToService();
-    logPackageVersions();
-    logDeviceSerialNumber();
-    AndroidBoard.getInstance().logAndroidBoardInfo();
+    RobotLog.logAppInfo();
     RobotLog.logDeviceInfo();
+    AndroidBoard.getInstance().logAndroidBoardInfo();
 
     if (preferencesHelper.readBoolean(getString(R.string.pref_wifi_automute), false)) {
       initWifiMute(true);
     }
 
-    FtcAboutActivity.setBuildTimeFromBuildConfig(BuildConfig.BUILD_TIME);
+    FtcAboutActivity.setBuildTimeFromBuildConfig(BuildConfig.APP_BUILD_TIME);
 
     // check to see if there is a preferred Wi-Fi to use.
     checkPreferredChannel();
 
-    FtcDashboard.start(context);
+    AnnotatedHooksClassFilter.getInstance().callOnCreateMethods(this);
   }
 
   protected UpdateUI createUpdateUI() {
@@ -423,6 +444,9 @@ public class FtcRobotControllerActivity extends Activity
   protected void onResume() {
     super.onResume();
     RobotLog.vv(TAG, "onResume()");
+
+    // In case the user just got back from fixing their clock, refresh ClockWarningSource
+    ClockWarningSource.getInstance().onPossibleRcClockUpdate();
   }
 
   @Override
@@ -458,7 +482,7 @@ public class FtcRobotControllerActivity extends Activity
 
     RobotLog.cancelWriteLogcatToDisk();
 
-    FtcDashboard.stop(context);
+    AnnotatedHooksClassFilter.getInstance().callOnDestroyMethods(this);
   }
 
   protected void bindToService() {
@@ -475,35 +499,10 @@ public class FtcRobotControllerActivity extends Activity
     }
   }
 
-  protected void logPackageVersions() {
-    /*
-    RobotLog.logBuildConfig(com.qualcomm.ftcrobotcontroller.BuildConfig.class);
-    RobotLog.logBuildConfig(com.qualcomm.robotcore.BuildConfig.class);
-    RobotLog.logBuildConfig(com.qualcomm.hardware.BuildConfig.class);
-    RobotLog.logBuildConfig(com.qualcomm.ftccommon.BuildConfig.class);
-    RobotLog.logBuildConfig(com.google.blocks.BuildConfig.class);
-    RobotLog.logBuildConfig(org.firstinspires.inspection.BuildConfig.class);
-    */
-  }
-
-  protected void logDeviceSerialNumber() {
-    RobotLog.ii(TAG, "Android device serial number: " + Device.getSerialNumberOrUnknown());
-  }
-
   protected void readNetworkType() {
-
-    // The code here used to defer to the value found in a configuration file
-    // to configure the network type. If the file was absent, then it initialized
-    // it with a default.
-    //
-    // However, bugs have been reported with that approach (empty config files, specifically).
-    // Moreover, the non-Wifi-Direct networking is end-of-life, so the simplest and most robust
-    // (e.g.: no one can screw things up by messing with the contents of the config file) fix is
-    // to do away with configuration file entirely.
-    //
     // Control hubs are always running the access point model.  Everything else, for the time
-    // being always runs the wifi direct model.
-    if (Device.isRevControlHub()) {
+    // being always runs the Wi-Fi Direct model.
+    if (Device.isRevControlHub() == true) {
       networkType = NetworkType.RCWIRELESSAP;
     } else {
       networkType = NetworkType.fromString(preferencesHelper.readString(context.getString(R.string.pref_pairing_kind), NetworkType.globalDefaultAsString()));
@@ -526,7 +525,7 @@ public class FtcRobotControllerActivity extends Activity
   @Override
   public boolean onCreateOptionsMenu(Menu menu) {
     getMenuInflater().inflate(R.menu.ftc_robot_controller, menu);
-    FtcDashboard.populateMenu(context, menu);
+    AnnotatedHooksClassFilter.getInstance().callOnCreateMenuMethods(this, menu);
     return true;
   }
 
@@ -627,8 +626,8 @@ public class FtcRobotControllerActivity extends Activity
   }
 
   /**
-   * Updates the orientation of monitorContainer (which contains cameraMonitorView and
-   * tfodMonitorView) based on the given configuration. Makes the children split the space.
+   * Updates the orientation of monitorContainer (which contains cameraMonitorView)
+   * based on the given configuration. Makes the children split the space.
    */
   private void updateMonitorLayout(Configuration configuration) {
     LinearLayout monitorContainer = (LinearLayout) findViewById(R.id.monitorContainer);
@@ -671,12 +670,20 @@ public class FtcRobotControllerActivity extends Activity
     controllerService = service;
     updateUI.setControllerService(controllerService);
 
+    controllerService.setOnBotJavaHelper(onBotJavaHelper);
+
     updateUIAndRequestRobotSetup();
     programmingModeManager.setState(new FtcRobotControllerServiceState() {
       @NonNull
       @Override
       public WebServer getWebServer() {
         return service.getWebServer();
+      }
+
+      @Nullable
+      @Override
+      public OnBotJavaHelper getOnBotJavaHelper() {
+        return service.getOnBotJavaHelper();
       }
 
       @Override
@@ -690,7 +697,8 @@ public class FtcRobotControllerActivity extends Activity
       }
     });
 
-    FtcDashboard.attachWebServer(context, service.getWebServer().getWebHandlerManager());
+    AnnotatedHooksClassFilter.getInstance().callWebHandlerRegistrarMethods(this,
+        service.getWebServer().getWebHandlerManager());
   }
 
   private void updateUIAndRequestRobotSetup() {
@@ -736,7 +744,7 @@ public class FtcRobotControllerActivity extends Activity
     passReceivedUsbAttachmentsToEventLoop();
     AndroidBoard.showErrorIfUnknownControlHub();
 
-    FtcDashboard.attachEventLoop(context, eventLoop);
+    AnnotatedHooksClassFilter.getInstance().callOnCreateEventLoopMethods(this, eventLoop);
   }
 
   protected OpModeRegister createOpModeRegister() {
