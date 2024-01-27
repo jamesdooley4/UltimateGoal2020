@@ -61,7 +61,6 @@ import android.widget.LinearLayout.LayoutParams;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.google.blocks.ftcrobotcontroller.ProgrammingWebHandlers;
 import com.google.blocks.ftcrobotcontroller.runtime.BlocksOpMode;
 import com.qualcomm.ftccommon.ClassManagerFactory;
@@ -140,6 +139,9 @@ public class FtcRobotControllerActivity extends Activity
   public static final String TAG = "RCActivity";
   public String getTag() { return TAG; }
 
+  public static double endAutoHeading;
+  public static double headingUpdateTime;
+
   private static final int REQUEST_CONFIG_WIFI_CHANNEL = 1;
   private static final int NUM_GAMEPADS = 2;
 
@@ -213,9 +215,9 @@ public class FtcRobotControllerActivity extends Activity
 
     if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(intent.getAction())) {
       UsbDevice usbDevice = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+      RobotLog.vv(TAG, "ACTION_USB_DEVICE_ATTACHED: %s", usbDevice.getDeviceName());
 
       if (usbDevice != null) {  // paranoia
-        RobotLog.vv(TAG, "ACTION_USB_DEVICE_ATTACHED: %s", usbDevice.getDeviceName());
         // We might get attachment notifications before the event loop is set up, so
         // we hold on to them and pass them along only when we're good and ready.
         if (receivedUsbAttachmentNotifications != null) { // *total* paranoia
@@ -681,11 +683,6 @@ public class FtcRobotControllerActivity extends Activity
       }
 
       @Nullable
-      @Override
-      public OnBotJavaHelper getOnBotJavaHelper() {
-        return service.getOnBotJavaHelper();
-      }
-
       @Override
       public OnBotJavaHelper getOnBotJavaHelper() {
         return service.getOnBotJavaHelper();
